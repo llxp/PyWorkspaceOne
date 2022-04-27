@@ -5,7 +5,11 @@ This module sets basic parameters that are needed to
 correctly connect to /mem API Endpoints
 """
 
-class MEM(object):
+from ..client import Client
+from ..rest import Rest
+
+
+class MEM(Rest):
     """
     Base MEM class
 
@@ -13,7 +17,14 @@ class MEM(object):
     Through these APIs, you can retreive email management device details
     and apply compliance policies to devices.
     """
-    pass
+
+    def __init__(self, client: Client):
+        """
+        Initialize the MEM class
+
+        :param client: Client object
+        """
+        Rest.__init__(self, client=client, module='mem')
 
 
 # TODO: Implement

@@ -2,22 +2,26 @@
 
 The module handles all basic methods to interact with the API.
 Basic HTTP Method calls are defined here (GET, POST, PUT, PATCH, DELETE)
-and static methods for error checking, building the client object and constructing header values.
+and static methods for error checking, building the client object
+and constructing header values.
 
 In Case of errors in the response the requests will raise an exception
 using the WorkspaceOneAPIError Class.
 """
 
 from __future__ import print_function, absolute_import
-import base64
-import logging
-import requests
+from base64 import b64encode
+from typing import Any
+from requests import (
+    Response,
+    get as r_get,
+    post as r_post,
+    put as r_put,
+    delete as r_delete,
+    patch as r_patch
+)
+
 from .error import WorkspaceOneAPIError
-from .mdm.devices import Devices
-from .system.groups import Groups
-from .system.users import Users
-from .system.info import Info
-from .mdm.tags import Tags
 
 
 # Enabling debugging at http.client level (requests->urllib3->http.client)
@@ -31,16 +35,18 @@ except ImportError:
 HTTPConnection.debuglevel = 0
 
 # TODO: programing using library should be able to set logging level
-# TODO: Implement logging to using config https://docs.python.org/3/howto/logging.html#configuring-logging
-# TODO: sett logging correctly for a library https://docs.python.org/3/howto/logging.html#configuring-logging-for-a-library
-logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
-requests_log = logging.getLogger("requests.packages.urllib3")
-requests_log.setLevel(logging.DEBUG)
-requests_log.propagate = True
+# TODO: Implement logging to using config
+# https://docs.python.org/3/howto/logging.html#configuring-logging
+# TODO: sett logging correctly for a library
+# https://docs.python.org/3/howto/logging.html#configuring-logging-for-a-library
+# logging.basicConfig()
+# logging.getLogger().setLevel(logging.DEBUG)
+# requests_log = logging.getLogger("requests.packages.urllib3")
+# requests_log.setLevel(logging.DEBUG)
+# requests_log.propagate = True
 
 
-class WorkspaceOneAPI(object):
+class Client(object):
     """
     Class for building a WorkspaceONE UEM API Object
     """
@@ -58,13 +64,16 @@ class WorkspaceOneAPI(object):
         self.apikey = apikey
         self.username = username
         self.password = password
-        self.groups = Groups(self)
-        self.devices = Devices(self)
-        self.users = Users(self)
-        self.info = Info(self)
-        self.tags = Tags(self)
 
-    def get(self, module, path, version=None, params=None, header=None, timeout=30):
+    def get(
+        self,
+        module: str,
+        path: str,
+        version: str = None,
+        params: dict = None,
+        header: dict = None,
+        timeout: int = 30
+    ) -> Response:
         """
         Sends a GET request to the API. Returns the response object.
         """
@@ -77,24 +86,23 @@ class WorkspaceOneAPI(object):
         header.update({"Content-Type": "application/json"})
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = requests.get(
+            api_response = r_get(
                 endpoint, params=params, headers=header, timeout=timeout)
-            api_response = self._check_for_error(api_response)
-            return api_response
+            return self._check_for_error(api_response)
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
     def post(
         self,
-        module,
-        path,
-        version=None,
-        params=None,
-        data=None,
-        json=None,
-        header=None,
-        timeout=30,
-    ):
+        module: str,
+        path: str,
+        version: str = None,
+        params: dict = None,
+        data: Any = None,
+        json: Any = None,
+        header: dict = None,
+        timeout: int = 30,
+    ) -> Response:
         """
         Sends a POST request to the API. Returns the response object.
         """
@@ -106,7 +114,7 @@ class WorkspaceOneAPI(object):
         )
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = requests.post(
+            api_response = r_post(
                 endpoint,
                 params=params,
                 data=data,
@@ -114,22 +122,55 @@ class WorkspaceOneAPI(object):
                 headers=header,
                 timeout=timeout,
             )
-            api_response = self._check_for_error(api_response)
-            return api_response
+            return self._check_for_error(api_response)
+        except WorkspaceOneAPIError as api_error:
+            raise api_error
+
+    def post_no_error_check(
+        self,
+        module: str,
+        path: str,
+        version: str = None,
+        params: dict = None,
+        data: Any = None,
+        json: Any = None,
+        header: dict = None,
+        timeout: int = 30,
+    ) -> Response:
+        """
+        Sends a POST request to the API.
+        Returns the response object without error checking.
+        """
+        if header is None:
+            header = {}
+        header.update(
+            self._build_header(self.username, self.password,
+                               self.apikey, header)
+        )
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        try:
+            return r_post(
+                endpoint,
+                params=params,
+                data=data,
+                json=json,
+                headers=header,
+                timeout=timeout,
+            )
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
     def put(
         self,
-        module,
-        path,
-        version=None,
-        params=None,
-        data=None,
-        json=None,
-        header=None,
-        timeout=30,
-    ):
+        module: str,
+        path: str,
+        version: str = None,
+        params: dict = None,
+        data: Any = None,
+        json: Any = None,
+        header: dict = None,
+        timeout: int = 30,
+    ) -> Response:
         """
         Sends a PUT request to the API. Returns the response object.
         """
@@ -141,7 +182,7 @@ class WorkspaceOneAPI(object):
         )
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = requests.put(
+            api_response = r_put(
                 endpoint,
                 params=params,
                 data=data,
@@ -156,15 +197,15 @@ class WorkspaceOneAPI(object):
 
     def patch(
         self,
-        module,
-        path,
-        version=None,
-        params=None,
-        data=None,
-        json=None,
-        header=None,
-        timeout=30,
-    ):
+        module: str,
+        path: str,
+        version: str = None,
+        params: dict = None,
+        data: Any = None,
+        json: Any = None,
+        header: dict = None,
+        timeout: int = 30,
+    ) -> Response:
         """
         Sends a Patch request to the API. Returns the response object.
         """
@@ -176,7 +217,7 @@ class WorkspaceOneAPI(object):
         )
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = requests.patch(
+            api_response = r_patch(
                 endpoint,
                 params=params,
                 data=data,
@@ -189,19 +230,17 @@ class WorkspaceOneAPI(object):
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
-    # NOQA
-
     def delete(
         self,
-        module,
-        path,
-        version=None,
-        params=None,
-        data=None,
-        json=None,
-        header=None,
-        timeout=30,
-    ):
+        module: str,
+        path: str,
+        version: str = None,
+        params: dict = None,
+        data: Any = None,
+        json: Any = None,
+        header: dict = None,
+        timeout: int = 30,
+    ) -> Response:
         """
         Sends a DELETE request to the API. Returns the response object.
         """
@@ -213,7 +252,7 @@ class WorkspaceOneAPI(object):
         )
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = requests.delete(
+            api_response = r_delete(
                 endpoint,
                 params=params,
                 data=data,
@@ -272,7 +311,7 @@ class WorkspaceOneAPI(object):
         """
         if not header:
             header = {}
-        hashed_auth = base64.b64encode(
+        hashed_auth = b64encode(
             (username + ":" + password).encode("utf8")
         ).decode("utf-8")
         header.update({"Authorization": "Basic {}".format(hashed_auth)})
