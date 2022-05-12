@@ -30,7 +30,7 @@ class Profiles(MDM):
         return self.searchv2(type='Auto', platform='WinRT', status='Active', ownership='C', orderby='ASC', pagesize=1000)
 
 
-    def get_profile_(self, profile_id):
+    def get_profile(self, profile_id):
         """
         Get Profile Details by Profile ID
         """
