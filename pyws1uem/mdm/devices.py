@@ -247,3 +247,17 @@ class Devices(MDM):
         """
         _path = "/groups/{}/enrollment-tokens".format(organization_group_uuid)
         return MDM._post(self, path=_path, json=registration_record)
+
+    def get_device_smartgroups(self, device_id):
+        """
+        Get the smart groups for a device
+        """
+        _path = "/devices/{}/smartgroups".format(device_id)
+        return MDM._get(self, path=_path)
+
+    def get_devices_apps(self, device_id):
+        """
+        Get the apps for a device
+        """
+        _path = "/devices/{}/apps".format(device_id)
+        return MDM._get(self, path=_path)

@@ -142,3 +142,9 @@ class Smartgroups(MDM):
         Get all apps of a smartgroup
         """
         return self._get(path=f'/smartgroups/{smartgroup_id}/apps')
+
+    def search_smartgroups(self, search_term: str):
+        """
+        Search smartgroups by name
+        """
+        return self._get(path=f'/smartgroups/search?name={search_term}')
