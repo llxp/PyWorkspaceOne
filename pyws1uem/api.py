@@ -1,5 +1,5 @@
 from .system import Info, Users, Groups
-from .mdm import Smartgroups, Tags, Devices
+from .mdm import Smartgroups, Tags, Devices, Profiles
 from .mam import Apps
 from .client import Client
 
@@ -26,3 +26,4 @@ class WorkspaceOneAPI(object):
         self.info = Info(self.client)
         self.tags = Tags(self.client)
         self.apps = Apps(self.client)
+        self.profiles = Profiles(self.client)
