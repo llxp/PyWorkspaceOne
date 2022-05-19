@@ -261,3 +261,10 @@ class Devices(MDM):
         """
         _path = "/devices/{}/apps".format(device_id)
         return MDM._get(self, path=_path)
+
+    def get_devices_profiles(self, device_id):
+        """
+        Get the profiles for a device
+        """
+        _path = "/devices/{}/profiles".format(device_id)
+        return MDM._get(self, path=_path)

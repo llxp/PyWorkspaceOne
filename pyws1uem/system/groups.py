@@ -27,7 +27,10 @@ class Groups(System):
         Returns the OG ID for a given Group ID
         """
         response = self.search(groupid=str(groupid))
-        return response['LocationGroups'][0]['Id']['Value']
+        if ('LocationGroups' in response and len(response['LocationGroups']) != 0):
+            return response['LocationGroups'][0]['Id']['Value']
+        else:
+            return None
 
     def get_groupid_from_id(self, groupid):
         """
@@ -41,7 +44,10 @@ class Groups(System):
         Returns the OG UUID for a given Group ID
         """
         response = System._get(self, path='/groups/{}'.format(groupid))
-        return response['Uuid']
+        if ('Uuid' in response and len(response['Uuid']) != 0):
+            return response['Uuid']
+        else:
+            return None
 
     def create(self, parent_id, ogdata):
         """
