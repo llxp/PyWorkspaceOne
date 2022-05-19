@@ -276,8 +276,11 @@ class Client(object):
             "application/json; charset=utf-8",
         ):
             json = response.json()
-            if json.get("errorCode"):
-                raise WorkspaceOneAPIError(json_response=json)
+            if isinstance(json, dict):
+                if json.get("errorCode"):
+                    raise WorkspaceOneAPIError(json_response=json)
+                else:
+                    return json
             else:
                 return json
         else:
