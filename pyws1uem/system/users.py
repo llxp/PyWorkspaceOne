@@ -147,3 +147,53 @@ class Users(System):
         path = '/users/{}/registerdevice'.format(user_id)
         response = System._post(self, path=path, data=register_device_details)
         return response
+
+    def enrolled_devices(
+        self,
+        organizational_group_id: str=None,
+        organization_group: str=None,
+        platform: str=None,
+        custom_attributes: str=None,
+        serial_number: str=None,
+        seen_since: str=None,
+        seen_till: str=None,
+        enrolled_since: str=None,
+        enrolled_till: str=None
+    ):
+        '''
+        Retrives enrolled device details for the query information provided in the request
+
+        :param: organizational_group_id:
+        :param: organization_group:
+        :param: platform:
+        :param: custom_attributes:
+        :param: serial_number:
+        :param: seen_since:
+        :param: seen_till:
+        :param: enrolled_since:
+        :param: enrolled_till:
+        :return: API response
+        '''
+        temp = ''
+        if organizational_group_id:
+            temp += f'organizationalgroupid={organizational_group_id}&'
+        if organization_group:
+            temp += f'organizationgroup={organization_group}&'
+        if platform:
+            temp += f'platform={platform}&'
+        if custom_attributes:
+            temp += f'customattributes={custom_attributes}&'
+        if serial_number:
+            temp += f'serialnumber={serial_number}&'
+        if seen_since:
+            temp += f'seensince={seen_since}&'
+        if seen_till:
+            temp += f'seentill={seen_till}&'
+        if enrolled_since:
+            temp += f'enrolledsince={enrolled_since}&'
+        if enrolled_till:
+            temp += f'enrolledtill={enrolled_till}&'
+
+        path=f'/users/enrolleddevices/search?{temp}'
+        response = System._get(self, path=path)
+        return response
