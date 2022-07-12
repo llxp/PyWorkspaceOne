@@ -51,7 +51,14 @@ class Client(object):
     Class for building a WorkspaceONE UEM API Object
     """
 
-    def __init__(self, env: str, apikey: str, username: str, password: str):
+    def __init__(
+        self,
+        env: str,
+        apikey: str,
+        username: str,
+        password: str,
+        verify: str
+    ):
         """
         Initialize an AirWatchAPI Client Object.
 
@@ -59,11 +66,13 @@ class Client(object):
                 apikey: API Key to authorize
                 username: Admin username
                 password: corresponding pasword
+                verify: manual SSL certificate
         """
         self.env = env
         self.apikey = apikey
         self.username = username
         self.password = password
+        self.verify = verify
 
     def get(
         self,
@@ -87,7 +96,12 @@ class Client(object):
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
             api_response = r_get(
-                endpoint, params=params, headers=header, timeout=timeout)
+                endpoint,
+                params=params,
+                headers=header,
+                timeout=timeout,
+                verify=self.verify
+            )
             return self._check_for_error(api_response)
         except WorkspaceOneAPIError as api_error:
             raise api_error
@@ -121,6 +135,7 @@ class Client(object):
                 json=json,
                 headers=header,
                 timeout=timeout,
+                verify=self.verify
             )
             return self._check_for_error(api_response)
         except WorkspaceOneAPIError as api_error:
@@ -156,6 +171,7 @@ class Client(object):
                 json=json,
                 headers=header,
                 timeout=timeout,
+                verify=self.verify
             )
         except WorkspaceOneAPIError as api_error:
             raise api_error
@@ -189,6 +205,7 @@ class Client(object):
                 json=json,
                 headers=header,
                 timeout=timeout,
+                verify=self.verify
             )
             api_response = self._check_for_error(api_response)
             return api_response
@@ -224,6 +241,7 @@ class Client(object):
                 json=json,
                 headers=header,
                 timeout=timeout,
+                verify=self.verify
             )
             api_response = self._check_for_error(api_response)
             return api_response
@@ -259,6 +277,7 @@ class Client(object):
                 json=json,
                 headers=header,
                 timeout=timeout,
+                verify=self.verify
             )
             api_response = self._check_for_error(api_response)
             return api_response

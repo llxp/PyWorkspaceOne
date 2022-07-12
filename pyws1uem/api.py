@@ -9,7 +9,14 @@ class WorkspaceOneAPI(object):
     Class for building a WorkspaceONE UEM API Object
     """
 
-    def __init__(self, env: str, apikey: str, username: str, password: str):
+    def __init__(
+        self,
+        env: str,
+        apikey: str,
+        username: str,
+        password: str,
+        verify: str=None
+    ):
         """
         Initialize an AirWatchAPI Client Object.
 
@@ -17,8 +24,9 @@ class WorkspaceOneAPI(object):
                 apikey: API Key to authorize
                 username: Admin username
                 password: corresponding pasword
+                verify: manual SSL certificat
         """
-        self.client = Client(env, apikey, username, password)
+        self.client = Client(env, apikey, username, password, verify=verify)
         self.groups = Groups(self.client)
         self.devices = Devices(self.client)
         self.smartgroups = Smartgroups(self.client)

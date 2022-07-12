@@ -194,6 +194,6 @@ class Users(System):
         if enrolled_till:
             temp += f'enrolledtill={enrolled_till}&'
 
-        path=f'/users/enrolleddevices/search?{temp}'
+        path=f'/users/enrolleddevices/search?{temp}'[:-1]
         response = System._get(self, path=path)
         return response
