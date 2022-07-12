@@ -1,2 +1,3 @@
 from .api import WorkspaceOneAPI
-__all__ = ['WorkspaceOneAPI']
+from .error import WorkspaceOneAPIError
+__all__ = ['WorkspaceOneAPI', 'WorkspaceOneAPIError']
