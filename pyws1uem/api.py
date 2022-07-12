@@ -24,6 +24,7 @@ class WorkspaceOneAPI(object):
                 apikey: API Key to authorize
                 username: Admin username
                 password: corresponding pasword
+                verify: manual SSL certificat
         """
         self.client = Client(env, apikey, username, password, verify=verify)
         self.groups = Groups(self.client)
