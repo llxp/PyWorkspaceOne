@@ -15,7 +15,7 @@ class WorkspaceOneAPI(object):
         apikey: str,
         username: str,
         password: str,
-        verify: str = None
+        verify: str=None
     ):
         """
         Initialize an AirWatchAPI Client Object.
