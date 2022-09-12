@@ -248,6 +248,13 @@ class Devices(MDM):
         _path = "/groups/{}/enrollment-tokens".format(organization_group_uuid)
         return MDM._post(self, path=_path, json=registration_record)
 
+    def delete_enrollment_token(self, organization_group_uuid, token_uuid):
+        """
+        Deletes a device enrollment token from the given organization unit
+        """
+        _path = "/groups/{}/enrollment-tokens/{}".format(organization_group_uuid, token_uuid)
+        return MDM._delete(self, path=_path)
+
     def get_device_smartgroups(self, device_id):
         """
         Get the smart groups for a device
