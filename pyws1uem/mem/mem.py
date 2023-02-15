@@ -5,8 +5,8 @@ This module sets basic parameters that are needed to
 correctly connect to /mem API Endpoints
 """
 
-from ..client import Client
-from ..rest import Rest
+from pyws1uem.rest import Rest
+from pyws1uem.client import Client
 
 
 class MEM(Rest):

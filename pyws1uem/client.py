@@ -11,28 +11,26 @@ using the WorkspaceOneAPIError Class.
 
 from __future__ import print_function, absolute_import
 from base64 import b64encode
-from typing import Any
-from requests import (
-    Response,
-    get as r_get,
-    post as r_post,
-    put as r_put,
-    delete as r_delete,
-    patch as r_patch
-)
+from typing import Any, Dict, List, Union
+from http.client import HTTPConnection
+from httpx import AsyncClient, Client as SyncClient, Response
+from httpx._types import VerifyTypes
 
-from .error import WorkspaceOneAPIError
-
+from pyws1uem.error import WorkspaceOneAPIError
 
 # Enabling debugging at http.client level (requests->urllib3->http.client)
 # you will see the REQUEST, including HEADERS and DATA, and RESPONSE with
 # HEADERS but without DATA.
 # the only thing missing will be the response.body which is not logged.
-try:
-    from http.client import HTTPConnection
-except ImportError:
-    from httplib import HTTPConnection
 HTTPConnection.debuglevel = 0
+
+_Params = Union[Dict[str, Any], str, bytes]
+SerializableType = Union[
+    str, int, float, bool,
+    List["SerializableType"],
+    Dict[str, "SerializableType"]
+]
+RestResponseType = Union[SerializableType, int]
 
 # TODO: programing using library should be able to set logging level
 # TODO: Implement logging to using config
@@ -57,7 +55,7 @@ class Client(object):
         apikey: str,
         username: str,
         password: str,
-        verify: str
+        verify: VerifyTypes = ""
     ):
         """
         Initialize an AirWatchAPI Client Object.
@@ -78,31 +76,26 @@ class Client(object):
         self,
         module: str,
         path: str,
-        version: str = None,
-        params: dict = None,
-        header: dict = None,
+        version: str = "",
+        params: _Params = {},
+        header: dict = {},
         timeout: int = 30
-    ) -> Response:
+    ) -> RestResponseType:
         """
         Sends a GET request to the API. Returns the response object.
         """
-        if header is None:
-            header = {}
-        header.update(
-            self._build_header(self.username, self.password,
-                               self.apikey, header)
-        )
-        header.update({"Content-Type": "application/json"})
+        header_tmp: Dict[str, str] = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        header_tmp.update({"Content-Type": "application/json"})
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = r_get(
-                endpoint,
-                params=params,
-                headers=header,
-                timeout=timeout,
-                verify=self.verify
-            )
-            return self._check_for_error(api_response)
+            with SyncClient(verify=self.verify) as client:
+                api_response = client.get(
+                    endpoint,
+                    params=params,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                return self._check_for_error(api_response)
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
@@ -110,33 +103,28 @@ class Client(object):
         self,
         module: str,
         path: str,
-        version: str = None,
-        params: dict = None,
+        version: str = "",
+        params: _Params = {},
         data: Any = None,
         json: Any = None,
-        header: dict = None,
+        header: dict = {},
         timeout: int = 30,
-    ) -> Response:
+    ) -> RestResponseType:
         """
         Sends a POST request to the API. Returns the response object.
         """
-        if header is None:
-            header = {}
-        header.update(
-            self._build_header(self.username, self.password,
-                               self.apikey, header)
-        )
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = r_post(
-                endpoint,
-                params=params,
-                data=data,
-                json=json,
-                headers=header,
-                timeout=timeout,
-                verify=self.verify
-            )
+            with SyncClient(verify=self.verify) as client:
+                api_response = client.post(
+                    endpoint,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
             return self._check_for_error(api_response)
         except WorkspaceOneAPIError as api_error:
             raise api_error
@@ -145,70 +133,56 @@ class Client(object):
         self,
         module: str,
         path: str,
-        version: str = None,
-        params: dict = None,
+        version: str = "",
+        params: _Params = {},
         data: Any = None,
         json: Any = None,
-        header: dict = None,
+        header: dict = {},
         timeout: int = 30,
     ) -> Response:
         """
         Sends a POST request to the API.
         Returns the response object without error checking.
         """
-        if header is None:
-            header = {}
-        header.update(
-            self._build_header(self.username, self.password,
-                               self.apikey, header)
-        )
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
-        try:
-            return r_post(
+        with SyncClient(verify=self.verify) as client:
+            return client.post(
                 endpoint,
                 params=params,
                 data=data,
                 json=json,
-                headers=header,
+                headers=header_tmp,
                 timeout=timeout,
-                verify=self.verify
             )
-        except WorkspaceOneAPIError as api_error:
-            raise api_error
 
     def put(
         self,
         module: str,
         path: str,
-        version: str = None,
-        params: dict = None,
+        version: str = "",
+        params: _Params = {},
         data: Any = None,
         json: Any = None,
-        header: dict = None,
+        header: Dict[str, str] = {},
         timeout: int = 30,
-    ) -> Response:
+    ) -> RestResponseType:
         """
         Sends a PUT request to the API. Returns the response object.
         """
-        if header is None:
-            header = {}
-        header.update(
-            self._build_header(self.username, self.password,
-                               self.apikey, header)
-        )
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = r_put(
-                endpoint,
-                params=params,
-                data=data,
-                json=json,
-                headers=header,
-                timeout=timeout,
-                verify=self.verify
-            )
-            api_response = self._check_for_error(api_response)
-            return api_response
+            with SyncClient(verify=self.verify) as client:
+                api_response = client.put(
+                    endpoint,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                return self._check_for_error(api_response)
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
@@ -216,35 +190,30 @@ class Client(object):
         self,
         module: str,
         path: str,
-        version: str = None,
-        params: dict = None,
+        version: str = "",
+        params: _Params = {},
         data: Any = None,
         json: Any = None,
-        header: dict = None,
+        header: dict = {},
         timeout: int = 30,
-    ) -> Response:
+    ) -> RestResponseType:
         """
         Sends a Patch request to the API. Returns the response object.
         """
-        if header is None:
-            header = {}
-        header.update(
-            self._build_header(self.username, self.password,
-                               self.apikey, header)
-        )
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = r_patch(
-                endpoint,
-                params=params,
-                data=data,
-                json=json,
-                headers=header,
-                timeout=timeout,
-                verify=self.verify
-            )
-            api_response = self._check_for_error(api_response)
-            return api_response
+            with SyncClient(verify=self.verify) as client:
+                api_response = client.patch(
+                    endpoint,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                api_response = self._check_for_error(api_response)
+                return api_response
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
@@ -252,40 +221,31 @@ class Client(object):
         self,
         module: str,
         path: str,
-        version: str = None,
-        params: dict = None,
-        data: Any = None,
-        json: Any = None,
-        header: dict = None,
+        version: str = "",
+        params: _Params = {},
+        header: Dict[str, str] = {},
         timeout: int = 30,
-    ) -> Response:
+    ) -> RestResponseType:
         """
         Sends a DELETE request to the API. Returns the response object.
         """
-        if header is None:
-            header = {}
-        header.update(
-            self._build_header(self.username, self.password,
-                               self.apikey, header)
-        )
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            api_response = r_delete(
-                endpoint,
-                params=params,
-                data=data,
-                json=json,
-                headers=header,
-                timeout=timeout,
-                verify=self.verify
-            )
-            api_response = self._check_for_error(api_response)
-            return api_response
+            with SyncClient(verify=self.verify) as client:
+                api_response = client.delete(
+                    endpoint,
+                    params=params,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                api_response = self._check_for_error(api_response)
+                return api_response
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
     @staticmethod
-    def _check_for_error(response):
+    def _check_for_error(response: Response) -> RestResponseType:
         """
         Checks the response for json data, then for an error, then for
         a status code
@@ -315,29 +275,204 @@ class Client(object):
         if base_url.endswith("/"):
             base_url = base_url[:-1]
         if version is None:
-            url = "{}/api/{}".format(base_url, module)
+            url = f"{base_url}/api/{module}"
         else:
-            url = "{}/api/v{}/{}".format(base_url, version, module)
+            url = f"{base_url}/api/v{version}/{module}"
         if path:
             if path.startswith("/"):
-                return url + "{}".format(path)
+                return f"{url}{path}"
             else:
-                return url + "/{}".format(path)
+                return f"{url}/{path}"
         return url
 
     @staticmethod
-    def _build_header(username, password, token, header=None):
+    def _build_header(username: str, password: str, token: str, header: Dict[str, str] = {}) -> Dict[str, str]:  # noqa: E501
         """
         Build the header with base64 login, AW API token,
         and accept a json response
         """
-        if not header:
-            header = {}
-        hashed_auth = b64encode(
-            (username + ":" + password).encode("utf8")
-        ).decode("utf-8")
-        header.update({"Authorization": "Basic {}".format(hashed_auth)})
-        header.update({"aw-tenant-code": token})
-        if not header.get("Accept"):
-            header.update({"Accept": "application/json"})
-        return header
+        header_tmp: Dict[str, str] = {}
+        if header:
+            header_tmp = header
+        username_password = f"{username}:{password}"
+        username_password_bytes = username_password.encode("ascii")
+        hashed_auth = b64encode(username_password_bytes).decode("utf-8")
+        header_tmp.update({"Authorization": f"Basic {hashed_auth}"})
+        header_tmp.update({"aw-tenant-code": token})
+        if not header_tmp.get("Accept"):
+            header_tmp.update({"Accept": "application/json"})
+        return header_tmp
+
+    # ----------------------------------------------------------------
+    # Async methods
+    # ----------------------------------------------------------------
+
+    async def async_get(
+        self,
+        module: str,
+        path: str,
+        version: str = "",
+        params: _Params = {},
+        header: dict = {},
+        timeout: int = 30
+    ) -> RestResponseType:
+        """
+        Sends a GET request to the API. Returns the response object.
+        """
+        header_tmp: Dict[str, str] = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        header_tmp.update({"Content-Type": "application/json"})
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        try:
+            async with AsyncClient(verify=self.verify) as client:
+                api_response = await client.get(
+                    endpoint,
+                    params=params,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                return self._check_for_error(api_response)
+        except WorkspaceOneAPIError as api_error:
+            raise api_error
+
+    async def async_post(
+        self,
+        module: str,
+        path: str,
+        version: str = "",
+        params: _Params = {},
+        data: Any = None,
+        json: Any = None,
+        header: dict = {},
+        timeout: int = 30,
+    ) -> RestResponseType:
+        """
+        Sends a POST request to the API. Returns the response object.
+        """
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        try:
+            async with AsyncClient(verify=self.verify) as client:
+                api_response = await client.post(
+                    endpoint,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+            return self._check_for_error(api_response)
+        except WorkspaceOneAPIError as api_error:
+            raise api_error
+
+    async def async_post_no_error_check(
+        self,
+        module: str,
+        path: str,
+        version: str = "",
+        params: _Params = {},
+        data: Any = None,
+        json: Any = None,
+        header: dict = {},
+        timeout: int = 30,
+    ) -> Response:
+        """
+        Sends a POST request to the API.
+        Returns the response object without error checking.
+        """
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        async with AsyncClient(verify=self.verify) as client:
+            return await client.post(
+                endpoint,
+                params=params,
+                data=data,
+                json=json,
+                headers=header_tmp,
+                timeout=timeout,
+            )
+
+    async def async_put(
+        self,
+        module: str,
+        path: str,
+        version: str = "",
+        params: _Params = {},
+        data: Any = None,
+        json: Any = None,
+        header: Dict[str, str] = {},
+        timeout: int = 30,
+    ) -> RestResponseType:
+        """
+        Sends a PUT request to the API. Returns the response object.
+        """
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        try:
+            async with AsyncClient(verify=self.verify) as client:
+                api_response = await client.put(
+                    endpoint,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                return self._check_for_error(api_response)
+        except WorkspaceOneAPIError as api_error:
+            raise api_error
+
+    async def async_patch(
+        self,
+        module: str,
+        path: str,
+        version: str = "",
+        params: _Params = {},
+        data: Any = None,
+        json: Any = None,
+        header: dict = {},
+        timeout: int = 30,
+    ) -> RestResponseType:
+        """
+        Sends a Patch request to the API. Returns the response object.
+        """
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        try:
+            async with AsyncClient(verify=self.verify) as client:
+                api_response = await client.patch(
+                    endpoint,
+                    params=params,
+                    data=data,
+                    json=json,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                return self._check_for_error(api_response)
+        except WorkspaceOneAPIError as api_error:
+            raise api_error
+
+    async def async_delete(
+        self,
+        module: str,
+        path: str,
+        version: str = "",
+        params: _Params = {},
+        header: Dict[str, str] = {},
+        timeout: int = 30,
+    ) -> RestResponseType:
+        """
+        Sends a DELETE request to the API. Returns the response object.
+        """
+        header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
+        endpoint = self._build_endpoint(self.env, module, path, version)
+        try:
+            async with AsyncClient(verify=self.verify) as client:
+                api_response = await client.delete(
+                    endpoint,
+                    params=params,
+                    headers=header_tmp,
+                    timeout=timeout,
+                )
+                return self._check_for_error(api_response)
+        except WorkspaceOneAPIError as api_error:
+            raise api_error

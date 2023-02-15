@@ -6,8 +6,8 @@ correctly connect to /mdm API Endpoints
 """
 
 
-from ..client import Client
-from ..rest import Rest
+from pyws1uem.client import Client
+from pyws1uem.rest import Rest
 
 
 class MDM(Rest):

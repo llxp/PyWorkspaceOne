@@ -1,7 +1,8 @@
-from .system import Info, Users, Groups
-from .mdm import Smartgroups, Tags, Devices, Profiles
-from .mam import Apps
-from .client import Client
+from pyws1uem.system import Info, Users, Groups
+from pyws1uem.mdm import Smartgroups, Tags, Devices, Profiles
+from pyws1uem.mam import Apps
+from pyws1uem.client import Client
+from httpx._types import VerifyTypes
 
 
 class WorkspaceOneAPI(object):
@@ -15,7 +16,7 @@ class WorkspaceOneAPI(object):
         apikey: str,
         username: str,
         password: str,
-        verify: str=None
+        verify: VerifyTypes = ""
     ):
         """
         Initialize an AirWatchAPI Client Object.

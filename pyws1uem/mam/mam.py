@@ -5,8 +5,8 @@ This module sets basic parameters that are needed to
 correctly connect to /mam API Endpoints
 """
 
-from ..client import Client
-from ..rest import Rest
+from pyws1uem.client import Client
+from pyws1uem.rest import Rest
 
 
 class MAM(Rest):

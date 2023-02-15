@@ -29,4 +29,4 @@ class WorkspaceOneAPIError(Exception):
                 self.error_msg = 'Unknown API error occurred'
 
     def __str__(self):
-        return 'Error #{}: {}'.format(self.error_code, self.error_msg)
+        return f'Error #{self.error_code}: {self.error_msg}'

@@ -2,8 +2,8 @@
 Module to manage smartgroups (add and remove)
 """
 
-from .mam import MAM
-from ..client import Client
+from pyws1uem.mam.mam import MAM
+from pyws1uem.client import Client
 
 
 class Apps(MAM):
@@ -26,3 +26,9 @@ class Apps(MAM):
         Get a specific app
         """
         return self._get(path=f'/apps/internal/{app_id}')
+
+    async def get_app_async(self, app_id: str):
+        """
+        Get a specific app
+        """
+        return await self._async_get(path=f'/apps/internal/{app_id}')
