@@ -95,7 +95,8 @@ class Client(object):
                     headers=header_tmp,
                     timeout=timeout,
                 )
-                return self._check_for_error(api_response)
+                response = self._check_for_error(api_response)
+                return response
         except WorkspaceOneAPIError as api_error:
             raise api_error
 
@@ -266,7 +267,7 @@ class Client(object):
             return response.status_code
 
     @staticmethod
-    def _build_endpoint(base_url, module, path=None, version=None):
+    def _build_endpoint(base_url, module, path: str = "", version: str = ""):
         """
         Builds the full url endpoint for the API request
         """
@@ -274,10 +275,10 @@ class Client(object):
             base_url = "https://" + base_url
         if base_url.endswith("/"):
             base_url = base_url[:-1]
-        if version is None:
-            url = f"{base_url}/api/{module}"
-        else:
+        if version:
             url = f"{base_url}/api/v{version}/{module}"
+        else:
+            url = f"{base_url}/api/{module}"
         if path:
             if path.startswith("/"):
                 return f"{url}{path}"

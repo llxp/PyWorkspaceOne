@@ -28,4 +28,4 @@ class System(Rest):
       to further assign to the devices.
     """
     def __init__(self, client: Client):
-        Rest.__init__(self, client=client, module='mem')
+        Rest.__init__(self, client=client, module='system')

@@ -30,7 +30,7 @@ class Groups(System):
         """
         return await self._async_get(path='/groups/search', params=kwargs)
 
-    def get_id_from_groupid(self, groupid: str) -> Union[str, None]:
+    def get_id_from_groupid(self, groupid: str) -> Union[int, None]:
         """
         Returns the OG ID for a given Group ID
 
@@ -46,17 +46,18 @@ class Groups(System):
             len(response['LocationGroups']) != 0
         ):
             locationGroups = response['LocationGroups']
+            firstLocationGroup = locationGroups[0]
             if (
-                isinstance(locationGroups[0], dict) and
-                'Id' in locationGroups[0] and
-                isinstance(locationGroups[0]['Id'], dict) and
-                'Value' in locationGroups[0]['Id'] and
-                isinstance(locationGroups[0]['Id']['Value'], str)
+                isinstance(firstLocationGroup, dict) and
+                'Id' in firstLocationGroup and
+                isinstance(firstLocationGroup['Id'], dict) and
+                'Value' in firstLocationGroup['Id'] and
+                isinstance(firstLocationGroup['Id']['Value'], int)
             ):
-                return locationGroups[0]['Id']['Value']
+                return int(firstLocationGroup['Id']['Value'])
         return None
 
-    async def get_id_from_groupid_async(self, groupid: str) -> Union[str, None]:  # noqa: E501
+    async def get_id_from_groupid_async(self, groupid: str) -> Union[int, None]:  # noqa: E501
         """
         Returns the OG ID for a given Group ID
 
@@ -77,7 +78,7 @@ class Groups(System):
                 'Id' in locationGroups[0] and
                 isinstance(locationGroups[0]['Id'], dict) and
                 'Value' in locationGroups[0]['Id'] and
-                isinstance(locationGroups[0]['Id']['Value'], str)
+                isinstance(locationGroups[0]['Id']['Value'], int)
             ):
                 return locationGroups[0]['Id']['Value']
         return None
@@ -136,13 +137,13 @@ class Groups(System):
             return response['Uuid']
         return None
 
-    def create(self, parent_id: str, ogdata: Any):
+    def create(self, parent_id: int, ogdata: Any):
         """
         Creates a Group and returns the new ID
         """
         return self._post(path=f'/groups/{parent_id}', data=ogdata, header=self.jheader)  # noqa: E501
 
-    async def create_async(self, parent_id: str, ogdata: Any):
+    async def create_async(self, parent_id: int, ogdata: Any):
         """
         Creates a Group and returns the new ID
         """
@@ -160,7 +161,7 @@ class Groups(System):
         }
         if name is None:
             new_og['Name'] = str(groupid)
-        response = self.create(parent_id="7", ogdata=json.dumps(new_og))
+        response = self.create(parent_id=7, ogdata=json.dumps(new_og))
         if (
             isinstance(response, dict) and
             'Value' in response and
@@ -181,7 +182,7 @@ class Groups(System):
         }
         if name is None:
             new_og['Name'] = str(groupid)
-        response = await self.create_async(parent_id="7", ogdata=json.dumps(new_og))  # noqa: E501
+        response = await self.create_async(parent_id=7, ogdata=json.dumps(new_og))  # noqa: E501
         if (
             isinstance(response, dict) and
             'Value' in response and
@@ -200,8 +201,8 @@ class Groups(System):
         Creates a Child OG for a given Parent Group ID, with a given Type,
         Group ID, and Name, and returns the new ID
         """
-        pid = self.get_id_from_groupid(parent_groupid)
-        if pid is None:
+        pgid = self.get_id_from_groupid(parent_groupid)
+        if pgid is None:
             return None
         new_og = {
             'GroupId': str(groupid),
@@ -212,7 +213,7 @@ class Groups(System):
             new_og['Name'] = str(groupid)
         if og_type is None:
             new_og['LocationGroupType'] = 'Container'
-        response = self.create(parent_id=pid, ogdata=json.dumps(new_og))
+        response = self.create(parent_id=pgid, ogdata=json.dumps(new_og))
         if (
             isinstance(response, dict) and
             'Value' in response and

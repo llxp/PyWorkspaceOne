@@ -28,13 +28,15 @@ class Rest(object):
         header: Dict[str, str] = {}
     ) -> RestResponseType:
         """GET requests for base endpoints"""
-        return self.client.get(
+        response = self.client.get(
             module=self._module,
             path=path,
             version=version,
             params=params,
             header=header
         )
+        print(f"Rest: {response}")
+        return response
 
     def _post(
         self,
