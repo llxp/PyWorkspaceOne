@@ -14,7 +14,9 @@ from base64 import b64encode
 from typing import Any, Dict, List, Union
 from http.client import HTTPConnection
 from httpx import AsyncClient, Client as SyncClient, Response
-from httpx._types import VerifyTypes
+from httpx._types import VerifyTypes, TimeoutTypes
+from httpx._client import UseClientDefault, USE_CLIENT_DEFAULT
+from httpx._config import DEFAULT_TIMEOUT_CONFIG
 
 from pyws1uem.error import WorkspaceOneAPIError
 
@@ -55,7 +57,8 @@ class Client(object):
         apikey: str,
         username: str,
         password: str,
-        verify: VerifyTypes = ""
+        verify: VerifyTypes = "",
+        timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG
     ):
         """
         Initialize an AirWatchAPI Client Object.
@@ -71,6 +74,7 @@ class Client(object):
         self.username = username
         self.password = password
         self.verify = verify
+        self.timeout = timeout
 
     def get(
         self,
@@ -79,7 +83,7 @@ class Client(object):
         version: str = "",
         params: _Params = {},
         header: dict = {},
-        timeout: int = 30
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a GET request to the API. Returns the response object.
@@ -88,7 +92,7 @@ class Client(object):
         header_tmp.update({"Content-Type": "application/json"})
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            with SyncClient(verify=self.verify) as client:
+            with SyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = client.get(
                     endpoint,
                     params=params,
@@ -109,7 +113,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: dict = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a POST request to the API. Returns the response object.
@@ -117,7 +121,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            with SyncClient(verify=self.verify) as client:
+            with SyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = client.post(
                     endpoint,
                     params=params,
@@ -139,7 +143,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: dict = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> Response:
         """
         Sends a POST request to the API.
@@ -147,7 +151,7 @@ class Client(object):
         """
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
-        with SyncClient(verify=self.verify) as client:
+        with SyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
             return client.post(
                 endpoint,
                 params=params,
@@ -166,7 +170,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: Dict[str, str] = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a PUT request to the API. Returns the response object.
@@ -174,7 +178,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            with SyncClient(verify=self.verify) as client:
+            with SyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = client.put(
                     endpoint,
                     params=params,
@@ -196,7 +200,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: dict = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a Patch request to the API. Returns the response object.
@@ -204,7 +208,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            with SyncClient(verify=self.verify) as client:
+            with SyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = client.patch(
                     endpoint,
                     params=params,
@@ -225,7 +229,7 @@ class Client(object):
         version: str = "",
         params: _Params = {},
         header: Dict[str, str] = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a DELETE request to the API. Returns the response object.
@@ -233,7 +237,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            with SyncClient(verify=self.verify) as client:
+            with SyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = client.delete(
                     endpoint,
                     params=params,
@@ -315,7 +319,7 @@ class Client(object):
         version: str = "",
         params: _Params = {},
         header: dict = {},
-        timeout: int = 30
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a GET request to the API. Returns the response object.
@@ -324,7 +328,7 @@ class Client(object):
         header_tmp.update({"Content-Type": "application/json"})
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            async with AsyncClient(verify=self.verify) as client:
+            async with AsyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = await client.get(
                     endpoint,
                     params=params,
@@ -344,7 +348,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: dict = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a POST request to the API. Returns the response object.
@@ -352,7 +356,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            async with AsyncClient(verify=self.verify) as client:
+            async with AsyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = await client.post(
                     endpoint,
                     params=params,
@@ -374,7 +378,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: dict = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> Response:
         """
         Sends a POST request to the API.
@@ -382,7 +386,7 @@ class Client(object):
         """
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
-        async with AsyncClient(verify=self.verify) as client:
+        async with AsyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
             return await client.post(
                 endpoint,
                 params=params,
@@ -401,7 +405,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: Dict[str, str] = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a PUT request to the API. Returns the response object.
@@ -409,7 +413,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            async with AsyncClient(verify=self.verify) as client:
+            async with AsyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = await client.put(
                     endpoint,
                     params=params,
@@ -431,7 +435,7 @@ class Client(object):
         data: Any = None,
         json: Any = None,
         header: dict = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a Patch request to the API. Returns the response object.
@@ -439,7 +443,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            async with AsyncClient(verify=self.verify) as client:
+            async with AsyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = await client.patch(
                     endpoint,
                     params=params,
@@ -459,7 +463,7 @@ class Client(object):
         version: str = "",
         params: _Params = {},
         header: Dict[str, str] = {},
-        timeout: int = 30,
+        timeout: Union[TimeoutTypes, UseClientDefault] = USE_CLIENT_DEFAULT,
     ) -> RestResponseType:
         """
         Sends a DELETE request to the API. Returns the response object.
@@ -467,7 +471,7 @@ class Client(object):
         header_tmp = self._build_header(self.username, self.password, self.apikey, header)  # noqa: E501
         endpoint = self._build_endpoint(self.env, module, path, version)
         try:
-            async with AsyncClient(verify=self.verify) as client:
+            async with AsyncClient(verify=self.verify, timeout=self.timeout) as client:  # noqa: E501
                 api_response = await client.delete(
                     endpoint,
                     params=params,

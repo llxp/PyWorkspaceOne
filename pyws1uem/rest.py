@@ -35,7 +35,6 @@ class Rest(object):
             params=params,
             header=header
         )
-        print(f"Rest: {response}")
         return response
 
     def _post(

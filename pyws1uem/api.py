@@ -2,7 +2,8 @@ from pyws1uem.system import Info, Users, Groups
 from pyws1uem.mdm import Smartgroups, Tags, Devices, Profiles
 from pyws1uem.mam import Apps
 from pyws1uem.client import Client
-from httpx._types import VerifyTypes
+from httpx._types import VerifyTypes, TimeoutTypes
+from httpx._config import DEFAULT_TIMEOUT_CONFIG
 
 
 class WorkspaceOneAPI(object):
@@ -16,7 +17,8 @@ class WorkspaceOneAPI(object):
         apikey: str,
         username: str,
         password: str,
-        verify: VerifyTypes = ""
+        verify: VerifyTypes = "",
+        timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG
     ):
         """
         Initialize an AirWatchAPI Client Object.
@@ -27,7 +29,7 @@ class WorkspaceOneAPI(object):
                 password: corresponding pasword
                 verify: manual SSL certificat
         """
-        self.client = Client(env, apikey, username, password, verify=verify)
+        self.client = Client(env, apikey, username, password, verify=verify, timeout=timeout)  # noqa: E501
         self.groups = Groups(self.client)
         self.devices = Devices(self.client)
         self.smartgroups = Smartgroups(self.client)
